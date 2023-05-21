@@ -1,57 +1,62 @@
 class Solution {
-    private List<int[]> bfsQueue;
-    
-    private void dfs(int[][] grid, int x, int y, int n) {
-        grid[x][y] = 2;
-        bfsQueue.add(new int[]{x, y});
-        for (int[] pair : new int[][]{{x + 1, y}, {x - 1, y}, {x, y + 1}, {x, y - 1}}) {
-            int curX = pair[0], curY = pair[1];
-            if (0 <= curX && curX < n && 0 <= curY && curY < n && grid[curX][curY] == 1) {
-                dfs(grid, curX, curY, n);
-            }
-        }
-    }
-    
-    // Find any land cell, and we treat it as a cell of island A.
-    public int shortestBridge(int[][] grid) {    
-        int n = grid.length;
-        int firstX = -1, firstY = -1;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (grid[i][j] == 1) {
-                    firstX = i;
-                    firstY = j;
+    public int shortestBridge(int[][] grid) {
+        int row = grid.length;
+        if(row == 0) return 0;
+        int col = grid[0].length;
+
+        Queue<int[]> q = new ArrayDeque<>();
+        boolean isFlip = false;
+        for(int i=0;i<row;i++) {
+            if(isFlip) break;
+            for(int j=0;j<col;j++) {
+                if(grid[i][j] == 1) {
+                    isFlip = true;
+                    dfs(grid, i, j, q);
                     break;
                 }
             }
         }
-        
-        // Add all land cells of island A to bfsQueue.
-        bfsQueue = new ArrayList<>();
-        dfs(grid, firstX, firstY, n);
-        
-        int distance = 0;
-        while (!bfsQueue.isEmpty()) {
-            List<int[]> newBfs = new ArrayList<>();
-            for (int[] pair : bfsQueue) {
-                int x = pair[0], y = pair[1];
-                for (int[] nextPair : new int[][]{{x + 1, y}, {x - 1, y}, {x, y + 1}, {x, y - 1}}) {
-                    int curX = nextPair[0], curY = nextPair[1];
-                    if (0 <= curX && curX < n && 0 <= curY && curY < n) {
-                        if (grid[curX][curY] == 1) {
-                            return distance;
-                        } else if (grid[curX][curY] == 0) {
-                            newBfs.add(nextPair);
-                            grid[curX][curY] = -1;
-                        }
-                    }
-                }
-            }
 
-            bfsQueue = newBfs;
-            distance++;
+        int level = 0;
+        int[] dir = new int[]{0,1,0,-1,0};
+        while(!q.isEmpty()) {
+            level++;
+            int size = q.size();
+            while(size > 0) {
+                int[] cur = q.poll();
+                int r = cur[0];
+                int c = cur[1];
+                for(int d = 0;d<4;d++) {
+                    int dr = r + dir[d];
+                    int dc = c + dir[d+1];
+                    if(dr >= row || dr < 0 || dc >= col || dc < 0) continue;
+                    if(grid[dr][dc] == 1) return level;
+                    if(grid[dr][dc] == 2) continue;
+                    q.offer(new int[]{dr,dc});
+                    grid[dr][dc] = 2;
+                }
+                size--;
+            }
         }
+        return level;
+
         
-        return distance;
-    }   
+    }
+
+    public void dfs(int[][] grid, int i, int j, Queue<int[]> q) {
+        if(i >= grid.length || i < 0 || j >= grid[0].length || j < 0) return;
+        if(grid[i][j] == 2) return;
+        
+        
+        if(grid[i][j] == 0){
+            grid[i][j] = 2;
+            q.add(new int[]{i,j});
+        } else {
+            grid[i][j] = 2;
+            dfs(grid, i+1,j,q);
+            dfs(grid, i,j-1,q);
+            dfs(grid, i-1,j,q);
+            dfs(grid, i,j+1,q);
+        }
+    }
 }
