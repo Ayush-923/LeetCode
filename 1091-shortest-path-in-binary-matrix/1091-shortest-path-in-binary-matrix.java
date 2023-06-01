@@ -1,44 +1,49 @@
-class Solution {
-    private int dir[][] = new int[][]{{0,1},{0,-1},{1,0},{-1,0},
-                                      {1,-1},{-1,1},{-1,-1},{1,1}};
-
+public class Solution {
     public int shortestPathBinaryMatrix(int[][] grid) {
+        int n = grid.length;
 
-        int m = grid.length;
-        int n = grid[0].length;
-
-        if(grid[0][0]==1 || grid[m-1][n-1]==1) {
+        // Check if the starting cell or the destination cell is blocked
+        if (grid[0][0] == 1 || grid[n - 1][n - 1] == 1) {
             return -1;
         }
 
-        boolean[][] visited = new boolean[m][n];
-        visited[0][0] = true;
+        int[][] directions = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
         Queue<int[]> queue = new LinkedList<>();
-        queue.add(new int[]{0,0});
+        queue.offer(new int[]{0, 0});
+        grid[0][0] = 1; // Mark the starting cell as visited
 
-        int ans=0;
+        int pathLength = 1;
+
         while (!queue.isEmpty()) {
             int size = queue.size();
-            for(int i=0;i<size;i++) {
-                int[] pop = queue.remove();
-                if(pop[0]==m-1 && pop[1]==n-1) {
-                    return ans+1;
+
+            for (int i = 0; i < size; i++) {
+                int[] curr = queue.poll();
+                int currX = curr[0];
+                int currY = curr[1];
+
+                // Check if we have reached the destination
+                if (currX == n - 1 && currY == n - 1) {
+                    return pathLength;
                 }
-                for (int k=0;k<8;k++) {
-                    int nextX = dir[k][0]+pop[0];
-                    int nextY = dir[k][1]+pop[1];
 
-                    if(nextX>=0 && nextX<m && nextY>=0 && nextY<n 
-                       && !visited[nextX][nextY] && grid[nextX][nextY]==0) {
-                        queue.add(new int[]{nextX,nextY});
-                        visited[nextX][nextY]=true;
+                // Explore all 8-directional neighbors
+                for (int[] dir : directions) {
+                    int newX = currX + dir[0];
+                    int newY = currY + dir[1];
+
+                    // Check if the neighbor is within the grid bounds and is a valid move
+                    if (newX >= 0 && newX < n && newY >= 0 && newY < n && grid[newX][newY] == 0) {
+                        queue.offer(new int[]{newX, newY});
+                        grid[newX][newY] = 1; // Mark the neighbor as visited
                     }
-
                 }
             }
-            ans++;
+
+            pathLength++;
         }
 
+        // No clear path found
         return -1;
     }
 }
