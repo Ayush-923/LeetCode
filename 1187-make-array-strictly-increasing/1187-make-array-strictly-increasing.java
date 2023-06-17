@@ -1,42 +1,36 @@
 class Solution {
     public int makeArrayIncreasing(int[] arr1, int[] arr2) {
-        Map<Integer, Integer> dp = new HashMap<>();
         Arrays.sort(arr2);
-        int n = arr2.length;
-        dp.put(-1, 0);
-
-        for (int i = 0; i < arr1.length; i++) {
-            Map<Integer, Integer> newDp = new HashMap<>();
-            for (int prev : dp.keySet()) {
-                if (arr1[i] > prev) {
-                    newDp.put(arr1[i], Math.min(newDp.getOrDefault(arr1[i], Integer.MAX_VALUE), dp.get(prev)));
-                }
-                int idx = bisectRight(arr2, prev);
-                if (idx < n) {
-                    newDp.put(arr2[idx], Math.min(newDp.getOrDefault(arr2[idx], Integer.MAX_VALUE), 1 + dp.get(prev)));
+        int n = arr1.length, N = Integer.MAX_VALUE >> 1;
+        int[] dp = new int[n + 1];
+        Arrays.fill(dp, N);
+        dp[0] = -N;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j >= 0; j--) {
+                dp[j] = dp[j] < arr1[i] ? arr1[i] : N;
+                if (j > 0 && dp[j - 1] < dp[j]) {
+                    dp[j] = Math.min(dp[j], binarySearch(arr2, dp[j - 1]));
                 }
             }
-            dp = newDp;
         }
-        
-        int answer = Integer.MAX_VALUE;
-        for (int value : dp.values()) {
-            answer = Math.min(answer, value);
+        for (int i = 0; i <= n; i++) {
+            if (dp[i] != N) {
+                return i;
+            }
         }
-        
-        return answer == Integer.MAX_VALUE ? -1 : answer;
+        return -1;
     }
-    
-    private static int bisectRight(int[] arr, int value) {
-        int left = 0, right = arr.length;
-        while (left < right) {
-            int mid = (left + right) / 2;
-            if (arr[mid] <= value) {
+
+    private int binarySearch(int[] arr, int num) {
+        int left = 0, right = arr.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left >> 1);
+            if (arr[mid] <= num) {
                 left = mid + 1;
             } else {
-                right = mid;
+                right = mid - 1;
             }
         }
-        return left;
+        return left == arr.length ? Integer.MAX_VALUE >> 1 : arr[left];
     }
 }
