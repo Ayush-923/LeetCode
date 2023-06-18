@@ -1,45 +1,45 @@
 class Solution {
-    int[][] dp;
-    int[][] directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-    int mod = 1_000_000_007;
-    
-    int dfs(int[][] grid, int i, int j) {
-        // If dp[i][j] is non-zero, it means we have got the value of dfs(i, j),
-        // so just return dp[i][j].
-        if (dp[i][j] != 0)
-            return dp[i][j];
-
-        // Otherwise, set answer = 1, the path made of grid[i][j] itself.
-        int answer = 1;
-
-        // Check its four neighbor cells, if a neighbor cell grid[prevI][prevJ] has a
-        // smaller value, we move to this cell and solve the subproblem: dfs(prevI, prevJ).
-        for (int[] d : directions) {
-            int prevI = i + d[0], prevJ = j + d[1];
-            if (0 <= prevI && prevI < grid.length && 0 <= prevJ && 
-                prevJ < grid[0].length && grid[prevI][prevJ] < grid[i][j]) {
-                answer += dfs(grid, prevI, prevJ);
-                answer %= mod;
-            }
+    private int[][] matrix;
+    private int rowLength, columnLength;
+    private int[][] dp;
+    private int mod = (int)(1e9+7);
+    public int longestIncreasingPath(int row, int col){
+        int longestpath = 1;
+        if(dp[row][col] > 0){
+            return dp[row][col];
         }
-
-        // Update dp[i][j], so that we don't recalculate its value later.
-        dp[i][j] = answer;
-        return answer;
+        if(row+1 < this.rowLength && this.matrix[row+1][col] > this.matrix[row][col]){
+            longestpath = (longestpath + longestIncreasingPath(row+1, col))%mod;
+        }
+        
+        if(row-1 >= 0 && this.matrix[row-1][col] > this.matrix[row][col]){
+            longestpath = (longestpath + longestIncreasingPath(row-1, col))%mod;
+        }
+        
+        if(col+1 < this.columnLength && this.matrix[row][col+1] > this.matrix[row][col]){
+             longestpath = (longestpath + longestIncreasingPath(row, col+1))%mod;
+        }
+        
+        if(col-1 >= 0 && this.matrix[row][col-1] > this.matrix[row][col]){
+            longestpath = (longestpath + longestIncreasingPath(row, col-1))%mod;
+        }
+        
+        dp[row][col] = longestpath;
+        return longestpath;
     }
     
     public int countPaths(int[][] grid) {
-        int m = grid.length, n = grid[0].length;
-        dp = new int[m][n];
-
-        // Iterate over all cells grid[i][j] and sum over dfs(i, j).
-        int answer = 0;
-        for (int i = 0; i < m; ++i) {
-            for (int j = 0; j < n; ++j) {
-                answer = (answer + dfs(grid, i, j)) % mod;
+        this.matrix = grid;
+        this.rowLength = matrix.length;
+        this.columnLength = matrix[0].length;
+        this.dp = new int[this.rowLength][this.columnLength];
+        
+        int ans = 0;
+        for(int i = 0; i < this.rowLength; i++){
+            for(int j = 0; j < this.columnLength; j++){
+                ans = (ans + longestIncreasingPath(i, j))%mod;
             }
         }
-
-        return answer;
+        return ans;
     }
 }
