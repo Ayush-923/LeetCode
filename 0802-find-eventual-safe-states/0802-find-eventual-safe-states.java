@@ -1,49 +1,42 @@
 class Solution {
-    public boolean dfs(int node, List<List<Integer>> adj, boolean[] visit, boolean[] inStack) {
-        // If the node is already in the stack, we have a cycle.
-        if (inStack[node]) {
-            return true;
+    public List<Integer> eventualSafeNodes(int[][] graph) {
+        int V = graph.length;
+
+        boolean[] visited = new boolean[V];
+        boolean[] pathVisited = new boolean[V];
+        boolean[] isSafe = new boolean[V];
+
+        List<Integer> safeNodes = new ArrayList<>();
+
+        for(int i=0;i<V;i++){
+            if(!visited[i]){
+                dfs(graph, i, visited, pathVisited, isSafe);
+            }
         }
-        if (visit[node]) {
-            return false;
+
+        for(int i=0;i<V;i++){
+            if(isSafe[i]) safeNodes.add(i);
         }
-        // Mark the current node as visited and part of current recursion stack.
-        visit[node] = true;
-        inStack[node] = true;
-        for (int neighbor : adj.get(node)) {
-            if (dfs(neighbor, adj, visit, inStack)) {
+
+        return safeNodes;
+    }
+
+    public boolean dfs(int[][] adj, int node, boolean[] visited,
+    boolean[] pathVisited,boolean[] isSafe){
+        visited[node] = true;
+        pathVisited[node] = true;
+        
+        for(int it : adj[node]){
+            if(!visited[it]){
+                if(dfs(adj,it,visited,pathVisited,isSafe)){
+                    return true;
+                }
+            }else if(pathVisited[it]){
                 return true;
             }
         }
-        // Remove the node from the stack.
-        inStack[node] = false;
+        isSafe[node] = true;
+        pathVisited[node] = false;
         return false;
-    }
-
-    public List<Integer> eventualSafeNodes(int[][] graph) {
-        int n = graph.length;
-        List<List<Integer>> adj = new ArrayList<>();
-
-        for (int i = 0; i < n; i++) {
-            adj.add(new ArrayList<>());
-            for (int node : graph[i]) {
-                adj.get(i).add(node);
-            }
-        }
-
-        boolean[] visit = new boolean[n];
-        boolean[] inStack = new boolean[n];
-
-        for (int i = 0; i < n; i++) {
-            dfs(i, adj, visit, inStack);
-        }
-
-        List<Integer> safeNodes = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            if (!inStack[i]) {
-                safeNodes.add(i);
-            }
-        }
-        return safeNodes;
     }
 }
