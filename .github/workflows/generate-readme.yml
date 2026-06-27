@@ -1,0 +1,56 @@
+name: Generate LeetCode README
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.java"
+  workflow_dispatch:
+    inputs:
+      path:
+        description: "Optional problem folder or Java file to regenerate"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: leetcode-readme-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  generate-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade openai
+
+      - name: Generate README content
+        run: python scripts/generate_readme.py --changed-only
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4o-mini' }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+          TARGET_PATH: ${{ inputs.path }}
+
+      - name: Commit README updates
+        run: |
+          git config user.name "leetcode-readme-bot"
+          git config user.email "leetcode-readme-bot@users.noreply.github.com"
+          git add .
+          git diff --cached --quiet || git commit -m "docs: generate LeetCode README"
+          git push
