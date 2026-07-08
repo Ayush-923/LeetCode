@@ -9,7 +9,8 @@ from pathlib import Path
 
 START_MARKER = "<!-- leetcode-ai-readme:start -->"
 END_MARKER = "<!-- leetcode-ai-readme:end -->"
-DEFAULT_MODEL = "gpt-4o-mini"
+DEFAULT_MODEL = "gpt-5.4-mini"
+FALLBACK_MODELS = ("gpt-4o-mini",)
 
 
 def run_git(args):
@@ -106,7 +107,26 @@ def managed_section(body):
     return f"{START_MARKER}\n{body}\n{END_MARKER}\n"
 
 
-def generate_ai_section(client, model, java_file, readme_text, solution):
+def candidate_models(preferred_model):
+    models = [preferred_model, DEFAULT_MODEL, *FALLBACK_MODELS]
+    unique = []
+    for model in models:
+        model = (model or "").strip()
+        if model and model not in unique:
+            unique.append(model)
+    return unique
+
+
+def safe_error_message(error):
+    message = str(error)
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    if api_key:
+        message = message.replace(api_key, "[redacted]")
+    message = " ".join(message.split())
+    return message[:1000]
+
+
+def generate_ai_section(client, models, java_file, readme_text, solution):
     title, link, difficulty = problem_metadata(readme_text, java_file.parent)
     prompt = f"""
 Create a concise Markdown explanation for a LeetCode Java solution.
@@ -144,19 +164,39 @@ Java solution:
 ```
 """.strip()
 
-    response = client.responses.create(
-        model=model,
-        input=prompt,
-    )
-    return response.output_text
+    last_error = None
+    for model in models:
+        try:
+            print(f"Generating README section for {java_file} with {model}")
+            response = client.responses.create(
+                model=model,
+                input=prompt,
+            )
+            output_text = getattr(response, "output_text", "").strip()
+            if output_text:
+                return output_text
+            last_error = RuntimeError("OpenAI returned an empty response.")
+            print(f"OpenAI returned an empty response with {model}.", file=sys.stderr)
+        except Exception as error:
+            last_error = error
+            print(
+                f"OpenAI generation failed with {model}: "
+                f"{error.__class__.__name__}: {safe_error_message(error)}",
+                file=sys.stderr,
+            )
+
+    raise RuntimeError(
+        "OpenAI README generation failed for all configured models. "
+        "Check OPENAI_API_KEY, billing/credits, and OPENAI_MODEL."
+    ) from last_error
 
 
-def update_readme_for_java(java_file, client, model):
+def update_readme_for_java(java_file, client, models):
     readme_file = java_file.parent / "README.md"
     readme_text = readme_file.read_text(encoding="utf-8", errors="ignore") if readme_file.exists() else ""
     solution = java_file.read_text(encoding="utf-8", errors="ignore")
 
-    body = generate_ai_section(client, model, java_file, readme_text, solution)
+    body = generate_ai_section(client, models, java_file, readme_text, solution)
     updated = remove_existing_generated_section(readme_text)
     if updated:
         updated = f"{updated}\n\n{managed_section(body)}"
@@ -205,10 +245,12 @@ def main():
         return 1
 
     client = OpenAI(api_key=api_key)
-    model = os.getenv("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
+    preferred_model = os.getenv("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
+    models = candidate_models(preferred_model)
+    print(f"Model order: {', '.join(models)}")
 
     for java_file in java_files:
-        update_readme_for_java(java_file, client, model)
+        update_readme_for_java(java_file, client, models)
 
     return 0
 
