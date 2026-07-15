@@ -31,6 +31,7 @@ Collection of LeetCode questions i sloved to ace the coding interviews in future
 ## Math
 | Problem Name | Difficulty |
 | ------- | ------- |
+| [3658-gcd-of-odd-and-even-sums](https://github.com/Ayush-923/LeetCode/tree/main/3658-gcd-of-odd-and-even-sums/) | Easy |
 | [3756-concatenate-non-zero-digits-and-multiply-by-sum-ii](https://github.com/Ayush-923/LeetCode/tree/main/3756-concatenate-non-zero-digits-and-multiply-by-sum-ii/) | Medium |
 ## String
 | Problem Name | Difficulty |
@@ -48,4 +49,8 @@ Collection of LeetCode questions i sloved to ace the coding interviews in future
 | Problem Name | Difficulty |
 | ------- | ------- |
 | [1331-rank-transform-of-an-array](https://github.com/Ayush-923/LeetCode/tree/main/1331-rank-transform-of-an-array/) | Easy |
+## Number Theory
+| Problem Name | Difficulty |
+| ------- | ------- |
+| [3658-gcd-of-odd-and-even-sums](https://github.com/Ayush-923/LeetCode/tree/main/3658-gcd-of-odd-and-even-sums/) | Easy |
 <!---LeetCode Topics End-->
