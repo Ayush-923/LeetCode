@@ -36,6 +36,7 @@ Collection of LeetCode questions i sloved to ace the coding interviews in future
 ## String
 | Problem Name | Difficulty |
 | ------- | ------- |
+| [3499-maximize-active-section-with-trade-i](https://github.com/Ayush-923/LeetCode/tree/main/3499-maximize-active-section-with-trade-i/) | Medium |
 | [3756-concatenate-non-zero-digits-and-multiply-by-sum-ii](https://github.com/Ayush-923/LeetCode/tree/main/3756-concatenate-non-zero-digits-and-multiply-by-sum-ii/) | Medium |
 ## Prefix Sum
 | Problem Name | Difficulty |
@@ -53,4 +54,8 @@ Collection of LeetCode questions i sloved to ace the coding interviews in future
 | Problem Name | Difficulty |
 | ------- | ------- |
 | [3658-gcd-of-odd-and-even-sums](https://github.com/Ayush-923/LeetCode/tree/main/3658-gcd-of-odd-and-even-sums/) | Easy |
+## Enumeration
+| Problem Name | Difficulty |
+| ------- | ------- |
+| [3499-maximize-active-section-with-trade-i](https://github.com/Ayush-923/LeetCode/tree/main/3499-maximize-active-section-with-trade-i/) | Medium |
 <!---LeetCode Topics End-->
